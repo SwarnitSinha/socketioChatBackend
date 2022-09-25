@@ -3,8 +3,19 @@ const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
 const cors = require('cors');
+
 const mailService = require('./mailService')
+
+//user model
 const User = require('./config/model/user')
+
+//user verification model
+const UserVerification = require('./config/model/userVerification')
+
+//random string 
+const {v4: uuidv4} = require('uuid');
+
+
 require(`dotenv`).config();
 
 require('./config/conn');
@@ -25,6 +36,7 @@ const users = {};
 app.use(express.json());
 
 app.post("/api/signIn", async (req,res)=>{
+    console.log(req.body.email)
     const user = await User.findOne({
         email:req.body.email
     })
@@ -64,8 +76,9 @@ app.post("/api/signUp",async (req,res)=>{
     
     try{
         
-        const email = req.body.email;
+        const email = req.body.email.toLowerCase();
         const username = req.body.username;
+        const password = req.body.password;
 
         const result = await User.findOne({email});
 
@@ -78,23 +91,27 @@ app.post("/api/signUp",async (req,res)=>{
         }
         
 
-        const user = new User({
-                email:email,
-                username: username,
-                password: req.body.password
-            
-        })
-
-        await user.updateOne({email}, {$set:{username,password}}, {upsert: true} )
+        // const user = new User({
+        //         email:email,
+        //         username: username,
+        //         password: password,
+        //         isVerified:false
+        // })
+        // 
+        await User.updateOne({email:email},
+                            {$set:{
+                                    username:username,
+                                    password:password,
+                                    isVerified:false
+                                }}, {upsert: true})
 
         // const token = await user.getAuthToken();
-        //send verification email
+
+        // send verification email
         
 
         res.json({
             status:200,
-            token:token,
-            isVerified:user.isVerified
         })
     }
     catch(e){
@@ -112,7 +129,7 @@ app.post("/api/sendOtp",validation, (req,res)=>{
         const email = req.body.email;
         const username = req.body.userName;
         console.log("Email :" + email+" Username : "+username);
-        sendOtp(email)
+        sendVerificationMail(email)
         res.send("done");
 
     } catch (error) {
@@ -122,7 +139,7 @@ app.post("/api/sendOtp",validation, (req,res)=>{
     
 });
 
-const sendOtp = async (email)=>{
+const sendVerificationMail = async (email)=>{
     
     try{
 
