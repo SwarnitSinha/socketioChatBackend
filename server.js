@@ -3,8 +3,12 @@ const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+
+require(`dotenv`).config();
 
 const mailService = require('./mailService')
+const {hashPassword,correctPassword} = require('./config/utils/hashPassword')
 
 //user model
 const User = require('./config/model/user')
@@ -16,7 +20,6 @@ const UserVerification = require('./config/model/userVerification')
 const {v4: uuidv4} = require('uuid');
 
 
-require(`dotenv`).config();
 
 require('./config/conn');
 
@@ -24,7 +27,6 @@ require('./config/conn');
 const {validation} = require('./config/middleware/auth.middleware')
 
 app.use(cors());
-
 const io = require('socket.io')(server,{
     cors: {
         origin: "*",
@@ -47,7 +49,9 @@ app.post("/api/signIn", async (req,res)=>{
             message:"Email not registered"
         })
     }
-    if(req.body.password!==user.password){
+
+    const passCorrect = await correctPassword(req.body.password,user.password)
+    if(!passCorrect){
         return res.json({
             status:400,
             error:true,
@@ -55,6 +59,10 @@ app.post("/api/signIn", async (req,res)=>{
         })
     }
     if(!user.isVerified){
+
+        //LOGIC FOR SENDING VERIFICATION MAIL
+        await sendVerificationMail(req,res);
+
         return res.json({
             status:401,
             error:true,
@@ -78,7 +86,7 @@ app.post("/api/signUp",async (req,res)=>{
         
         const email = req.body.email.toLowerCase();
         const username = req.body.username;
-        const password = req.body.password;
+        const password = await hashPassword(req.body.password);
 
         const result = await User.findOne({email});
 
@@ -89,15 +97,7 @@ app.post("/api/signUp",async (req,res)=>{
                 message:"User already exist"
             })
         }
-        
 
-        // const user = new User({
-        //         email:email,
-        //         username: username,
-        //         password: password,
-        //         isVerified:false
-        // })
-        // 
         await User.updateOne({email:email},
                             {$set:{
                                     username:username,
@@ -109,9 +109,11 @@ app.post("/api/signUp",async (req,res)=>{
 
         // send verification email
         
+        await sendVerificationMail(req,res);
 
         res.json({
             status:200,
+            message:"Verfication link has been sent to your email. Confirm your email"
         })
     }
     catch(e){
@@ -124,34 +126,49 @@ app.post("/api/signUp",async (req,res)=>{
     }
     
 });
-app.post("/api/sendOtp",validation, (req,res)=>{
+
+const sendVerificationMail = async (req,res)=>{
     try {
         const email = req.body.email;
         const username = req.body.userName;
         console.log("Email :" + email+" Username : "+username);
-        sendVerificationMail(email)
-        res.send("done");
+
+        const token = await jwt.sign({email,username},process.env.SECRET_KEY,{ expiresIn: 180 })
+        const msg = "http://localhost:5000/api/mailVerification?token="+token
+
+        await mailService(email,msg,"OTP-Verification for Stranger-Chat");
+
 
     } catch (error) {
         console.log("Error happens ", error);
-        res.send("error");
     }
-    
-});
+}
 
-const sendVerificationMail = async (email)=>{
-    
+app.get("/api/mailVerification",async (req,res)=>{
+    console.log(req.query);
+
+    //things to do - JWT verify
     try{
 
-        otp = "32423";
-        await mailService.sendEmail(email,otp,"OTP-Verification for Stranger-Chat");
-        
-    }
-    catch(err){
-        console.log("error occured "+err);
-    }
+        const result = await jwt.verify(req.query.token,process.env.SECRET_KEY);
+        console.log(result)
 
-}
+        //verify the user in DB
+        const email = result.email;
+        const user = await User.updateOne({email:email},{$set:{isVerified:true}})
+
+        res.send("You are verified")
+    
+    }
+    catch(e){
+        console.log(e.message)
+        res.send("Sorry Token Expired");
+
+    }
+    
+
+
+})
 
 io.on("connection", (socket) => {
     
@@ -172,3 +189,6 @@ io.on("connection", (socket) => {
 server.listen(5000,()=>{
     console.log("server is listening in 5000...")
 });
+
+
+

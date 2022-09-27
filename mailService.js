@@ -2,12 +2,15 @@ const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 const createError = require("http-errors")
 
+// require(`dotenv`).config();
+
 // const { randomValueHex } = require("../utils/generateValue");
 
+//these we get from google auth console
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI;
-const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+const REFRESH_TOKEN = process.env.REFRESH_TOKEN;  // it changes with some time period
 
 //google api installation
 
@@ -16,17 +19,16 @@ const oAuth2Client = new google.auth.OAuth2(
   CLIENT_SECRET,
   REDIRECT_URI
 );
+
 oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
 
-exports.sendEmail =(receiverEmail,body,subject) => {
-  return new Promise(async (resolve, reject) => {
+module.exports=sendEmail = async (receiverEmail,body,subject) => {
     try {
-      
+      console.log(REFRESH_TOKEN+" "+CLIENT_ID+" "+CLIENT_SECRET);
       const accessToken = await oAuth2Client.getAccessToken();
       
-
-      const transport = nodemailer.createTransport({
+      const transport =await nodemailer.createTransport({
         service: "gmail",
         auth: {
           type: "OAuth2",
@@ -48,12 +50,19 @@ exports.sendEmail =(receiverEmail,body,subject) => {
 
         const result = await transport.sendMail(mailOptions);
         console.log("Email has been successfully sent to " + receiverEmail);
-      resolve(result);
+
+        return {
+          status:401,
+          message:"Email sent Successfull"
+        }
+
     } catch (error) {
         console.log("Mailer ", error);
-      reject(createError(500,"Internal Server Error"));
+        return {
+          status:501,
+          message:"Internal Error"
+        }
     }
-  });
 }
  
 

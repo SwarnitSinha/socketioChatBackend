@@ -3,5 +3,15 @@ POST http://localhost:5000/api/sendOtp HTTP/1.1
 Content-Type: application/json
 
 {
-    "email":"swarnitsinha@gmail.com"
+    "email":"swarnitsinha@gmail.com",
+    "userName":"swarnit"
+}
+#####
+
+POST http://localhost:5000/api/signIn HTTP/1.1
+Content-Type: application/json
+
+{
+    "email":"swarnitsinha@gmail.com",
+    "password":"123"
 }
