@@ -134,7 +134,11 @@ const sendVerificationMail = async (req,res)=>{
         console.log("Email :" + email+" Username : "+username);
 
         const token = await jwt.sign({email,username},process.env.SECRET_KEY,{ expiresIn: 180 })
-        const msg = "http://localhost:5000/api/mailVerification?token="+token
+
+        const link = "http://localhost:5000/api/mailVerification?token="+token
+
+        const msg = `Thanks for signing up with Let's Talk. Now talk to strangers.<br> ${link}`
+        
 
         await mailService(email,msg,"OTP-Verification for Stranger-Chat");
 
@@ -155,9 +159,11 @@ app.get("/api/mailVerification",async (req,res)=>{
 
         //verify the user in DB
         const email = result.email;
+
+        //if the email will be wrong then it will throw an error
         const user = await User.updateOne({email:email},{$set:{isVerified:true}})
 
-        res.send("You are verified")
+        res.send("You are verified. Now sign In")
     
     }
     catch(e){

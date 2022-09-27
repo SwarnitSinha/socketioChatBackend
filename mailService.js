@@ -42,7 +42,7 @@ module.exports=sendEmail = async (receiverEmail,body,subject) => {
       });
 
       const mailOptions = {
-        from: "orvide.com ✉ <initiatetenet@gmail.com>",
+        from: "Let's Talk ✉ <initiatetenet@gmail.com>",
         to: receiverEmail,
         subject: subject,
         text: body,
