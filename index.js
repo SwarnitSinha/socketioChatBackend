@@ -19,7 +19,7 @@ const UserVerification = require('./config/model/userVerification')
 //random string 
 const {v4: uuidv4} = require('uuid');
 
-
+const port = process.env.PORT || 5000
 
 require('./config/conn');
 
@@ -198,7 +198,7 @@ io.on("connection", (socket) => {
     })
 });
 
-server.listen(5000,()=>{
+server.listen(port,()=>{
     console.log("server is listening in 5000...")
 });
 
