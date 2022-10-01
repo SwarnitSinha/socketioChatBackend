@@ -37,6 +37,12 @@ const users = {};
 
 app.use(express.json());
 
+app.get("/",(req,res)=>{
+    res.json({
+        message: "Welcome to Chat app"
+    })
+})
+
 app.post("/api/signIn", async (req,res)=>{
     console.log(req.body.email)
     const user = await User.findOne({
