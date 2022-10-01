@@ -141,7 +141,7 @@ const sendVerificationMail = async (req,res)=>{
 
         const token = await jwt.sign({email,username},process.env.SECRET_KEY,{ expiresIn: 180 })
 
-        const link = "http://localhost:5000/api/mailVerification?token="+token
+        const link = "https://randombatch.herokuapp.com/api/mailVerification?token="+token
 
         const msg = `Thanks for signing up with Let's Talk. Now talk to strangers.<br> ${link}`
         
