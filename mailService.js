@@ -1,6 +1,5 @@
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
-const createError = require("http-errors")
 
 
 
@@ -25,7 +24,7 @@ oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
 module.exports=sendEmail = async (receiverEmail,username,link,subject) => {
     try {
-      console.log("hehfhehfehfheh");
+      // console.log("hehfhehfehfheh");
       const accessToken = await oAuth2Client.getAccessToken();
       // console.log("link: "+msg);
       const transport =await nodemailer.createTransport({
@@ -51,19 +50,17 @@ module.exports=sendEmail = async (receiverEmail,username,link,subject) => {
       };
 
       
-        const result = await transport.sendMail(mailOptions);
-        console.log("Email has been successfully sent to " + receiverEmail);
-
+        await transport.sendMail(mailOptions);
+        
         return {
           status:401,
           message:"Email sent Successfull"
         }
 
     } catch (error) {
-        console.log("Mailer ", error);
         return {
           status:501,
-          message:error
+          message:error.message
         }
     }
 }

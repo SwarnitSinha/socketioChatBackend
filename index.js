@@ -1,4 +1,3 @@
-const nodeMailer = require('nodemailer');
 const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
@@ -115,7 +114,7 @@ app.post("/api/signUp",async (req,res)=>{
 
         // send verification email
         
-        await sendVerificationMail(req,res);
+        await sendVerificationMail(req);
 
         res.json({
             status:200,
@@ -137,31 +136,33 @@ app.post("/api/signUp",async (req,res)=>{
 // app.post("/api/sendOtp",async(req,res)=>{
 //     try{
 //         console.log("here");
-//         await sendVerificationMail(req,res);
+//         const result = await sendVerificationMail(req,res);
+//         // console.log(result.message)
+//         res.json({
+//             message:"mail has been sent"
+//         });
 //     }
 //     catch(error){
 //         console.log(error);
 //     }
 // })
 
-const sendVerificationMail = async (req,res)=>{
+const sendVerificationMail = async (data)=>{
     try {
-        const email = req.body.email;
-        const username = req.body.userName;
+        const email = data.body.email;
+        const username = data.body.userName;
         console.log("Email :" + email+" Username : "+username);
 
         const token = await jwt.sign({email,username},process.env.SECRET_KEY,{ expiresIn: 600 })
 
         const link = "https://randombatch.herokuapp.com/api/mailVerification?token="+token
 
-        // const msg = `Thanks for signing up with Let's Talk. Now talk to strangers.<br> ${link}`
-        
-
         await mailService(email,username,link,"OTP-Verification for Stranger-Chat");
 
-
+        return;
     } catch (error) {
         console.log("Error happens ", error);
+        return;
     }
 }
 
