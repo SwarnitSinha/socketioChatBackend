@@ -134,15 +134,15 @@ app.post("/api/signUp",async (req,res)=>{
 });
 
 //for rough
-app.post("/api/sendOtp",async(req,res)=>{
-    try{
-        console.log("here");
-        await sendVerificationMail(req,res);
-    }
-    catch(error){
-        console.log(error);
-    }
-})
+// app.post("/api/sendOtp",async(req,res)=>{
+//     try{
+//         console.log("here");
+//         await sendVerificationMail(req,res);
+//     }
+//     catch(error){
+//         console.log(error);
+//     }
+// })
 
 const sendVerificationMail = async (req,res)=>{
     try {
@@ -154,7 +154,7 @@ const sendVerificationMail = async (req,res)=>{
 
         const link = "https://randombatch.herokuapp.com/api/mailVerification?token="+token
 
-        const msg = `Thanks for signing up with Let's Talk. Now talk to strangers.<br> ${link}`
+        // const msg = `Thanks for signing up with Let's Talk. Now talk to strangers.<br> ${link}`
         
 
         await mailService(email,username,link,"OTP-Verification for Stranger-Chat");
