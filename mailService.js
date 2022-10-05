@@ -2,7 +2,7 @@ const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 const createError = require("http-errors")
 
-// require(`dotenv`).config();
+
 
 // const { randomValueHex } = require("../utils/generateValue");
 
@@ -23,11 +23,11 @@ const oAuth2Client = new google.auth.OAuth2(
 oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
 
-module.exports=sendEmail = async (receiverEmail,body,subject) => {
+module.exports=sendEmail = async (receiverEmail,username,link,subject) => {
     try {
-      console.log(REFRESH_TOKEN+" "+CLIENT_ID+" "+CLIENT_SECRET);
+      console.log("hehfhehfehfheh");
       const accessToken = await oAuth2Client.getAccessToken();
-      
+      // console.log("link: "+msg);
       const transport =await nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -41,13 +41,16 @@ module.exports=sendEmail = async (receiverEmail,body,subject) => {
         tls: { rejectUnauthorized: false },
       });
 
+     
       const mailOptions = {
         from: "Let's Talk ✉ <initiatetenet@gmail.com>",
         to: receiverEmail,
         subject: subject,
-        text: body,
+        text: "Mail for verification.", // plain text body
+        html:`<div style="background-color:#F9F9F9; padding:12px"><h2>Hello ${username.toUpperCase()}!!</h2><br><p>We're glad to have you on board at Let's Talk. Now Let's connect with the STRANGE WORLD. </p><br>Verfiy your account by clicking on the Link.<br>${link}<p style="color:#000000; background-color:#F5EFE6"; text-align:center">Valid only for 10 minutes</p></div>`, // html body
       };
 
+      
         const result = await transport.sendMail(mailOptions);
         console.log("Email has been successfully sent to " + receiverEmail);
 
@@ -60,7 +63,7 @@ module.exports=sendEmail = async (receiverEmail,body,subject) => {
         console.log("Mailer ", error);
         return {
           status:501,
-          message:"Internal Error"
+          message:error
         }
     }
 }

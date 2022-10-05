@@ -133,20 +133,31 @@ app.post("/api/signUp",async (req,res)=>{
     
 });
 
+//for rough
+app.post("/api/sendOtp",async(req,res)=>{
+    try{
+        console.log("here");
+        await sendVerificationMail(req,res);
+    }
+    catch(error){
+        console.log(error);
+    }
+})
+
 const sendVerificationMail = async (req,res)=>{
     try {
         const email = req.body.email;
         const username = req.body.userName;
         console.log("Email :" + email+" Username : "+username);
 
-        const token = await jwt.sign({email,username},process.env.SECRET_KEY,{ expiresIn: 180 })
+        const token = await jwt.sign({email,username},process.env.SECRET_KEY,{ expiresIn: 600 })
 
         const link = "https://randombatch.herokuapp.com/api/mailVerification?token="+token
 
         const msg = `Thanks for signing up with Let's Talk. Now talk to strangers.<br> ${link}`
         
 
-        await mailService(email,msg,"OTP-Verification for Stranger-Chat");
+        await mailService(email,username,link,"OTP-Verification for Stranger-Chat");
 
 
     } catch (error) {
@@ -199,7 +210,7 @@ io.on("connection", (socket) => {
 });
 
 server.listen(port,()=>{
-    console.log("server is listening in 5000...")
+    console.log("server is listening in "+port)
 });
 
 
