@@ -15,3 +15,12 @@ Content-Type: application/json
     "email":"swarnitsinha@gmail.com",
     "password":"123"
 }
+################################################################
+POST http://localhost:5000/api/signUp HTTP/1.1
+Content-Type: application/json
+
+{
+    "email":"dipikesh.singh.915@gmail.com",
+    "username":"dipikesh",
+    "password":"123"
+}

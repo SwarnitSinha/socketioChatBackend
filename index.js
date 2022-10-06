@@ -92,7 +92,7 @@ app.post("/api/signUp",async (req,res)=>{
         const email = req.body.email.toLowerCase();
         const username = req.body.username;
         const password = await hashPassword(req.body.password);
-
+        console.log(email, username, password)
         const result = await User.findOne({email});
 
         if(result && result.isVerified){
@@ -114,7 +114,7 @@ app.post("/api/signUp",async (req,res)=>{
 
         // send verification email
         
-        await sendVerificationMail(req);
+        await sendVerificationMail({email,username});
 
         res.json({
             status:200,
@@ -149,8 +149,8 @@ app.post("/api/signUp",async (req,res)=>{
 
 const sendVerificationMail = async (data)=>{
     try {
-        const email = data.body.email;
-        const username = data.body.userName;
+        const email = data.email;
+        const username = data.username;
         console.log("Email :" + email+" Username : "+username);
 
         const token = await jwt.sign({email,username},process.env.SECRET_KEY,{ expiresIn: 600 })
