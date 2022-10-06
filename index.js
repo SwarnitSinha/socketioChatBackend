@@ -173,7 +173,7 @@ app.get("/api/mailVerification",async (req,res)=>{
     try{
 
         const result = await jwt.verify(req.query.token,process.env.SECRET_KEY);
-        console.log(result)
+        console.log(result);
 
         //verify the user in DB
         const email = result.email;
@@ -193,6 +193,25 @@ app.get("/api/mailVerification",async (req,res)=>{
 
 
 })
+
+app.post("/api/verifyToken", async (req,res)=>{
+    try{
+        const token = req.body.token;
+        const result =await jwt.verify(token,process.env.SECRET_KEY);
+        console.log(result); //result has user_id
+        const user = await User.findOne({_id:result},{password:0,isVerified:0});
+        
+        res.json({
+            user:user
+        })
+    }
+    catch(error){
+        res.json({
+            message:"Error happens"
+        })
+    }
+})
+
 
 io.on("connection", (socket) => {
     
