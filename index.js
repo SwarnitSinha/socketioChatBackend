@@ -70,7 +70,8 @@ app.post("/api/signIn", async (req,res)=>{
         //LOGIC FOR SENDING VERIFICATION MAIL
         // username and email
           //it doesn't have username
-        await sendVerificationMail({email,user.username});
+        const username = user.username;
+        await sendVerificationMail({email,username});
 
         return res.json({
             status:401,
