@@ -44,6 +44,8 @@ app.get("/",(req,res)=>{
 
 app.post("/api/signIn", async (req,res)=>{
     console.log(req.body.email)
+    const email = req.body.email;
+    const username = req.body.username;
     const user = await User.findOne({
         email:req.body.email
     })
@@ -66,7 +68,8 @@ app.post("/api/signIn", async (req,res)=>{
     if(!user.isVerified){
 
         //LOGIC FOR SENDING VERIFICATION MAIL
-        await sendVerificationMail(req,res);
+        // username and email
+        await sendVerificationMail({email,username});
 
         return res.json({
             status:401,
