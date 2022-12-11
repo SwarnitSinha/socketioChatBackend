@@ -1,3 +1,4 @@
+//BACKEND
 const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
@@ -12,18 +13,9 @@ const {hashPassword,correctPassword} = require('./config/utils/hashPassword')
 //user model
 const User = require('./config/model/user')
 
-//user verification model
-const UserVerification = require('./config/model/userVerification')
-
-//random string 
-const {v4: uuidv4} = require('uuid');
-
 const port = process.env.PORT || 5000
 
 require('./config/conn');
-
-
-const {validation} = require('./config/middleware/auth.middleware')
 
 app.use(cors());
 const io = require('socket.io')(server,{
@@ -90,6 +82,7 @@ app.post("/api/signIn", async (req,res)=>{
         isVerified: user.isVerified
     })
 });
+
 app.post("/api/signUp",async (req,res)=>{
     
     try{
@@ -115,8 +108,6 @@ app.post("/api/signUp",async (req,res)=>{
                                     isVerified:false
                                 }}, {upsert: true})
 
-        // const token = await user.getAuthToken();
-
         // send verification email
       
         await sendVerificationMail({email,username});
@@ -137,42 +128,7 @@ app.post("/api/signUp",async (req,res)=>{
     
 });
 
-//for rough
-// app.post("/api/sendOtp",async(req,res)=>{
-//     try{
-//         console.log("here");
-//         const result = await sendVerificationMail(req,res);
-//         // console.log(result.message)
-//         res.json({
-//             message:"mail has been sent"
-//         });
-//     }
-//     catch(error){
-//         console.log(error);
-//     }
-// })
-
-const sendVerificationMail = async (data)=>{
-    try {
-        const email = data.email;
-        const username = data.username;
-        console.log("Email :" + email+" Username : "+username);
-
-        const token = await jwt.sign({email,username},process.env.SECRET_KEY,{ expiresIn: 600 })
-
-        const link = "https://randombatch.herokuapp.com/api/mailVerification?token="+token
-
-        await mailService(email,username,link,"OTP-Verification for Stranger-Chat");
-
-        return;
-    } catch (error) {
-        console.log("Error happens ", error);
-        return;
-    }
-}
-
 app.get("/api/mailVerification",async (req,res)=>{
-    console.log(req.query);
 
     //things to do - JWT verify
     try{
@@ -217,6 +173,24 @@ app.post("/api/verifyToken", async (req,res)=>{
     }
 })
 
+const sendVerificationMail = async (data)=>{
+    try {
+        const email = data.email;
+        const username = data.username;
+        console.log("Email :" + email+" Username : "+username);
+
+        const token = await jwt.sign({email,username},process.env.SECRET_KEY,{ expiresIn: 600 })
+
+        const link = "https://randombatch.herokuapp.com/api/mailVerification?token="+token
+
+        await mailService(email,username,link,"OTP-Verification for Stranger-Chat");
+
+        return;
+    } catch (error) {
+        console.log("Error happens ", error);
+        return;
+    }
+}
 
 io.on("connection", (socket) => {
     
