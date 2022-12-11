@@ -35,7 +35,7 @@ app.get("/",(req,res)=>{
 })
 
 app.post("/api/signIn", async (req,res)=>{
-    // console.log(req.body.email)
+    console.log("sign in request made ",req.body.email)
     const email = req.body.email;
     // const username = req.body.username;
     const user = await User.findOne({
@@ -181,7 +181,7 @@ const sendVerificationMail = async (data)=>{
 
         const token = await jwt.sign({email,username},process.env.SECRET_KEY,{ expiresIn: 600 })
 
-        const link = "https://randombatch.herokuapp.com/api/mailVerification?token="+token
+        const link = "https://socketio-chat-backend.vercel.app/api/mailVerification?token="+token
 
         await mailService(email,username,link,"OTP-Verification for Stranger-Chat");
 
